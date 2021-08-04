@@ -12,7 +12,17 @@ Your dbt projects needs to be held in an Azure DevOps repository. Create this ah
 One approach is to clone this repository, copy all these files into your new Azure DevOps repository, and then update from this starting point.
 
 ### Initialise and update
-Instead of clonging this repository, you can intialise your own dbt project in the Azure DevOps repository with the command `dbt init <project name>`, make the configuration changes listed below, and continue from this starting point.
+Instead of clonging this repository, you can intialise your own dbt project with the command `dbt init <project name>`, and then turn the generated folder into your Azure DevOps repository with the below commands:
+```bash
+cd <project name, the created fodler>
+git init
+git add --all
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin <Azure DevOps repository URL which ends in .git>
+git push -u origin main
+```
+From this starting point you can make the configuration changes listed below and develop the configuration.
 
 ### Configuration additions
 
