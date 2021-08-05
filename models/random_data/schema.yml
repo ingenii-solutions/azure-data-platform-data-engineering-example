@@ -1,0 +1,38 @@
+version: 2
+
+sources:
+  - name: random_example
+    schema: random_example
+    tables:
+      - name: alpha
+        external:
+          using: "delta"
+        join:
+          type: merge_insert
+          column: "date"
+        file_details:
+          sep: ","
+          header: false
+          dateFormat: dd/MM/yyyy
+        columns:
+          - name: date
+            data_type: "date"
+            tests: 
+              - unique
+              - not_null
+          - name: price1
+            data_type: "decimal(18,9)"
+            tests: 
+              - not_null
+          - name: price2
+            data_type: "decimal(18,9)"
+            tests: 
+              - not_null
+          - name: price3
+            data_type: "decimal(18,9)"
+            tests: 
+              - not_null
+          - name: price4
+            data_type: "decimal(18,9)"
+            tests: 
+              - not_null
