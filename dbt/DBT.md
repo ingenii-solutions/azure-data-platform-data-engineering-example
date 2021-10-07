@@ -4,7 +4,7 @@ Here we keep a record of the required settings for dbt to work with the platform
 
 ## Integration
 
-In order to integrate with our data platform, there are certain settings that are required, and some additions made to th edbt schema to better understand the files we are ingesting.
+In order to integrate with our data platform, there are certain settings that are required, and some additions made to the dbt schema to better understand the files we are ingesting.
 
 ### Configuration requirements
 
@@ -24,22 +24,80 @@ When running dbt tests, when there are a lot of tests associated with a table we
 
 We have created a fix to allow users to retry all errors when testing, which this flag sets. At time of writing [our PR to update dbt-spark is open](https://github.com/dbt-labs/dbt-spark/pull/194).
 
-### Schema additions
+### Data source and table schema
 
 We have an example schema.yml in `models/random_data/` to showcase what we need to integrate dbt with Databricks and the Ingenii data engineering pipelines. Details of the files/tables we want to ingest are set here as `sources`, which are read by our pipelines to be able to get them into the Data Platform environment. 
 
-For the general schema, please see the [dbt documentation for sources](https://docs.getdbt.com/reference/source-properties), and set or add the below changes for each `table` entry:
- - `external`: This should always be present and set as an object `using: "delta"` to integrate with the Azure Data Lake
- - `join`: A new object to define how we should add new data to the main table. The `column` entry will add a comma-separated list of names if your primary key involves more than one column. We have a few options for the `type`:
-    - `merge_insert`: This will only insert new rows, as long as the entry does not already exist based on the `column` entry.
-    - `merge_update`: This will insert new rows and update existing ones, matching based on the `column` entry.
-    - `insert`, or not set: all rows in each file will be inserted, regardless if this causes a duplicate.
- - `file_details`: Gives details about the source file to help read it. We are expecting a falt.csv file, so these entries are passed to, and so must follow the conventions of, the [pyspark.sql.DataFrameReader.csv](https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameReader.csv.html#pyspark.sql.DataFrameReader.csv) function. `path` and `schema` are set separately, so do not set these or the `inferSchema` and `enforceSchema` parameters. Some example parameters are below:
-      - `sep`: When reading the source files, this is the field separator. For example, in comma-separated values (.csv), this is a comma ','
-      - `header`: boolean, whether the source files have a header row
-      - `dateFormat`: The format to convert from strings to date types. 
-      - `timestampFormat`: The format to convert from strings to datetimes types.
- - `columns`: To read the csv file we set the data type using the new `data_type` key. For the values, we use the [Databricks SQL data types](https://docs.microsoft.com/en-us/azure/databricks/spark/latest/spark-sql/language-manual/sql-ref-datatypes#sql)
+In your Azure DevOps data engineering repository, a dbt project should be in the `dbt` folder. This is where we draw information about the data sources and the data quality tests to apply, and as part of the CI/CD process will be made available to the Databricks environment.
+All data we want the platform to know about should be recorded as [dbt sources](https://docs.getdbt.com/docs/building-a-dbt-project/using-sources), where we specify each of the tables and their schemas in one or more `schema.yml` files. For the general schema, please see the [dbt documentation for sources](https://docs.getdbt.com/reference/source-properties). An example file would be
+
+```
+version: 2
+
+sources:
+  - name: random_example
+    schema: random_example
+    tables:
+      - name: alpha
+        external:
+          using: "delta"
+        join:
+          type: merge
+          column: "date"
+        file_details:
+          sep: ","
+          header: false
+          dateFormat: dd/MM/yyyy
+        columns:
+          - name: date
+            data_type: "date"
+            tests: 
+              - unique
+              - not_null
+          - name: price1
+            data_type: "decimal(18,9)"
+            tests: 
+              - not_null
+          - name: price2
+            data_type: "decimal(18,9)"
+            tests: 
+              - not_null
+          - name: price3
+            data_type: "decimal(18,9)"
+            tests: 
+              - not_null
+          - name: price4
+            data_type: "decimal(18,9)"
+            tests: 
+              - not_null
+```
+#### Schema: Sources
+Each source must have the following keys:
+  1. `name`: The name of the source internal to dbt
+  1. `schema`: The schema to load the tables to in the database. Keep this the same as the name
+  1. `tables`: A list of each of the tables that we will ingest
+
+#### Schema: Tables
+Each table within a source must have the following keys:
+  1. `name`: The name of the table
+  1. `external`: This sets that this is a delta table, and is stored in a mounted container. Always include this object as it is here.
+  1. `join`: object to define how we should add new data to the main source table. The `column` entry will accept a comma-separated list of column names, if more than one forms the primary key. We have a few options for the `type`:
+      1. `merge_insert`: This will only insert new rows, as long as the entry does not already exist based on the `column` entry.
+      1. `merge_update`: This will insert new rows and update existing ones, matching based on the `column` entry.
+      1. `insert`, or not set: all rows in each file will be inserted, regardless if this causes a duplicate.
+  1. `file_details`: Gives general information about the source file to help read it. These entries are passed to, and so must follow the conventions of, the [pyspark.sql.DataFrameReader.csv](https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.sql.DataFrameReader.csv.html#pyspark.sql.DataFrameReader.csv) function. 'path' and 'schema' are set separately, so do not set these or the 'inferSchema' and 'enforceSchema' parameters. Some example parameters are below:
+      1. `sep`: When reading the source files, this is the field separator. For example, in comma-separated values (.csv), this is a comma ','
+      1. `header`: boolean, whether the source files have a header row
+      1. `dateFormat`: The format to convert from strings to date types. 
+      1. `timestampFormat`: The format to convert from strings to datetimes types. 
+  1. `columns`: A list of all the columns of the file. Schema is detailed in the section below
+
+#### Schema: Columns
+For each table all columns need to be specified, and each must have the following keys: 
+  1. `name`: The name of the column
+  1. `data_type`: The data type we expect the column to be, using [Databricks SQL data types](https://docs.microsoft.com/en-us/azure/databricks/spark/latest/spark-sql/language-manual/sql-ref-datatypes#sql)
+  1. `tests`: A list of any [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests) that we want to apply to the column on ingestion
+
 
 ## dbt Resources:
 - Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
