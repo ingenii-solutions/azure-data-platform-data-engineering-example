@@ -1,3 +1,5 @@
+# This file should not be changed
+
 from setuptools import setup
 
 setup(

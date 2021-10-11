@@ -1,4 +1,4 @@
-# Ingenii Azure Data Platform dbt Example
+# dbt Configuration
 
 Here we keep a record of the required settings for dbt to work with the platform. This repository is tested to work with dbt version 0.19.1.
 
