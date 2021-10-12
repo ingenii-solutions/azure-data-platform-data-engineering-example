@@ -1,6 +1,10 @@
 # Pre-Processing
 
-The pre-processing stage of the data pipeline determines whether a file needs to be rewriten before it is ingested in the data platform. In this `pre_process` folder we keep the code that needs to be run at this stage.
+The pre-processing stage of the data pipeline determines whether a raw file needs to be rewriten before it is ingested in the data platform. We can use this step to get the file into a state that can be easily ingested. Some examples of changes are:
+ - Changing column names in a .csv to match the schema we want
+ - Reforming a .json file into a form that can be ingested, by taking a complex object and simplifying it
+ - Pulling only the relevant information from a .json file and creating a .csv to make ingestion easier
+In this `pre_process` folder we keep the code that needs to be run at this stage.
 
 ## How the data pipeline uses this code
 
@@ -25,9 +29,11 @@ def find_pre_process_function(data_provider: str, table_name: str
 
 ## Functions
 
-When the function is triggered, its only argument is an object that contains the details of the file, with some utility functions to interact with the file. The object is an instantiated version of the `PreProcess` class, [the definition of which you can see here](https://github.com/ingenii-solutions/azure-data-platform-data-engineering/blob/main/ingenii_data_engineering/pre_process.py).
-
 As you find that your source data needs pre-processing, add your own files and functions to this `pre_process` folder, and make sure they are referred to by the `find_pre_process_function` function in the `root.py` file to be used.
+
+When the function is triggered, its only argument is an object that contains the details of the file, with some utility functions to interact with the file. The object is an instantiated version of the `PreProcess` class, [the definition of which you can see here](https://github.com/ingenii-solutions/azure-data-platform-data-engineering/blob/main/ingenii_data_engineering/pre_process.py). This has utility functions to make it easier to read and write files to make them compatible with the environment, so all you need to provide is the file-specific code. For example, at time of writing there are only two file formats that the platform can ingest:
+1. A `.csv` file, which can be easily created with the `write_json_to_csv` file
+1. A `.json` file where each row is a JSON object corresponding to one line of data, which can be eaily created with the `write_json` file.
 
 ## Development
 
