@@ -1,6 +1,6 @@
 # dbt Configuration
 
-Here we keep a record of the required settings for dbt to work with the platform. This repository is tested to work with dbt version 0.19.1.
+The dbt project in the `dbt` folder is where we draw information about the data sources and the data quality tests to apply. All data we want the platform to know about should be recorded as [dbt sources](https://docs.getdbt.com/docs/building-a-dbt-project/using-sources), where we specify each of the tables and their schemas in one or more `schema.yml` files. The folder structure for these files needs to be `models/<source or data provider name>/<table name>.yml`. For the general schema, please see the [dbt documentation for sources](https://docs.getdbt.com/reference/source-properties). 
 
 ## Integration
 
@@ -26,10 +26,7 @@ We have created a fix to allow users to retry all errors when testing, which thi
 
 ### Data source and table schema
 
-We have an example schema.yml in `models/random_data/` to showcase what we need to integrate dbt with Databricks and the Ingenii data engineering pipelines. Details of the files/tables we want to ingest are set here as `sources`, which are read by our pipelines to be able to get them into the Data Platform environment. 
-
-In your Azure DevOps data engineering repository, a dbt project should be in the `dbt` folder. This is where we draw information about the data sources and the data quality tests to apply, and as part of the CI/CD process will be made available to the Databricks environment.
-All data we want the platform to know about should be recorded as [dbt sources](https://docs.getdbt.com/docs/building-a-dbt-project/using-sources), where we specify each of the tables and their schemas in one or more `schema.yml` files. For the general schema, please see the [dbt documentation for sources](https://docs.getdbt.com/reference/source-properties). An example file would be
+We have an example schema.yml in `models/random_data/` to showcase what we need to integrate dbt with Databricks and the Ingenii data engineering pipelines. Details of the files/tables we want to ingest are set here as `sources`, which are read by our pipelines to ingest them into the Data Platform environment. 
 
 ```
 version: 2
@@ -73,7 +70,7 @@ sources:
 ```
 #### Schema: Sources
 Each source must have the following keys:
-  1. `name`: The name of the source internal to dbt
+  1. `name`: The name of the source or data provider
   1. `schema`: The schema to load the tables to in the database. Keep this the same as the name
   1. `tables`: A list of each of the tables that we will ingest
 
@@ -97,7 +94,6 @@ For each table all columns need to be specified, and each must have the followin
   1. `name`: The name of the column
   1. `data_type`: The data type we expect the column to be, using [Databricks SQL data types](https://docs.microsoft.com/en-us/azure/databricks/spark/latest/spark-sql/language-manual/sql-ref-datatypes#sql)
   1. `tests`: A list of any [dbt tests](https://docs.getdbt.com/docs/building-a-dbt-project/tests) that we want to apply to the column on ingestion
-
 
 ## dbt Resources:
 - Learn more about dbt [in the docs](https://docs.getdbt.com/docs/introduction)
