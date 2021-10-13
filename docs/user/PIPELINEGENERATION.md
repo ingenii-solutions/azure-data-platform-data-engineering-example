@@ -12,7 +12,7 @@ When your configuration is set correctly, run the command:
 ```
 make create-data-factory-objects
 ```
-This will create or update any objects within the `pipeline_generation/generated` folder, which will need to be deployed to the relevant Data Factory resources.
+This will create or update any objects within the `pipeline_generation/` folder, in sub-folders specific to the object type, which will need to be deployed to the relevant Data Factory resources.
 
 ## Deployment
 
@@ -24,7 +24,7 @@ Since some resources refer to other ones, the deployment of each 'class' of reso
 1. pipelines
 1. triggers
 
-Deployment is made through the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/), either through the CI/CD pipeline or deployed manually. Example code to deploy these resources is given below, from the context within the `pipeline_generation/generated` folder and using a Linux terminal:
+Deployment is made through the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/), either through the CI/CD pipeline or deployed manually. Example code to deploy these resources is given below, from the context within the `pipeline_generation/` folder and using a Linux terminal:
 
 ```bash
 RESOURCEGROUP=<resource group name>
