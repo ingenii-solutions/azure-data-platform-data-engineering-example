@@ -1,4 +1,4 @@
-# dbt Configuration
+# Understanding and Ingesting Data
 
 The dbt project in the `dbt` folder is where we draw information about the data sources and the data quality tests to apply. All data we want the platform to know about should be recorded as [dbt sources](https://docs.getdbt.com/docs/building-a-dbt-project/using-sources), where we specify each of the tables and their schemas in one or more `schema.yml` files. The folder structure for these files needs to be `models/<source or data provider name>/<table name>.yml`. For the general schema, please see the [dbt documentation for sources](https://docs.getdbt.com/reference/source-properties). 
 
