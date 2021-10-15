@@ -1,6 +1,6 @@
 # Pipeline Generation
 
-This section is not necessary if you already have a pipeline to load files into the `raw` container in your data lake. If you do need a pipeline, we have built the [Azure Data Factory Generator](https://github.com/ingenii-solutions/azure-data-factory-generator) to easily create and manage pipelines to pull data into the platform. See the [usage documentation](https://github.com/ingenii-solutions/azure-data-factory-generator/docs/user/ADFGUSAGE.md) for information of how the package works.
+This section is not necessary if you already have a pipeline to load files into the `raw` container in your data lake. If you do need a pipeline, we have built the [Azure Data Factory Generator](https://github.com/ingenii-solutions/azure-data-factory-generator) to easily create and manage pipelines to pull data into the platform. See the [usage documentation](https://github.com/ingenii-solutions/azure-data-factory-generator/docs/user/Usage.md) for information of how the package works.
 
 In your data engineering repository you can create the configurations that the [Ingenii Azure Data Factory Generator](https://github.com/ingenii-solutions/azure-data-factory-generator) package will read to create the pipelines and other objects we can deploy to Data Factory to pull data into your data platform.
 
