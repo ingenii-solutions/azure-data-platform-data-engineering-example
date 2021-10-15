@@ -6,4 +6,4 @@ The full details of how the different sections work are held in the relevant doc
 
 1. [Pipeline Generation](./Pipeline_Generation.md)
 1. [Pre-Processing](./Pre-Processing.md)
-1. [dbt](./DBT.md)
+1. [DBT](./DBT.md)
