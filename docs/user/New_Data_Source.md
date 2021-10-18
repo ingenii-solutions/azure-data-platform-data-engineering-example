@@ -23,8 +23,8 @@ If you already have a system for getting the files into the right place, then on
 
 ## Pre-processing the raw data
 
-1. [Pre-Processing](./pre_process.md)
+Currently, the data platform can only ingest files in a few forms, and it's likely that the raw data you receive from your data file needs to be changed to match these forms. If this is the case, then the pre-processing step is where you can add python code which the data pipeline will run against your files before they are ingested into the platform. Full details about how this works and how you can add your code can be found in the [Pre-Processing](./pre_process.md) documentation.
 
 ## Understanding and ingesting into the platform
 
-1. [Understanding and Ingesting Data](./understanding_and_ingesting_data.md)
+The final section that needs to be configured is setting definitions so that the platform can both read the source files and set the properties of the tables in the Databricks environment. Full details can be found in the [Understanding and Ingesting Data](./Understanding_and_Ingesting_Data.md) documentation.
