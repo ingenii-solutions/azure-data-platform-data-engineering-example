@@ -1,10 +1,41 @@
 # Pre-Processing
 
-The pre-processing stage of the data pipeline determines whether a raw file needs to be rewriten before it is ingested in the data platform. We can use this step to get the file into a state that can be easily ingested. Some examples of changes are:
+The pre-processing stage of the data pipeline determines whether a raw file needs to be rewritten before it is ingested in the data platform. We can use this step to get the file into a state that can be easily ingested. Some examples of changes are:
  - Changing column names in a .csv to match the schema we want
  - Reforming a .json file into a form that can be ingested, by taking a complex object and simplifying it
  - Pulling only the relevant information from a .json file and creating a .csv to make ingestion easier
 In this `pre_process` folder we keep the code that needs to be run at this stage.
+
+## Possible Data File Forms
+
+Currently, there are two forms of data files that the platform will understand:
+
+1. `.csv` or any 'separated' data type
+    1. Each row of the file must correspond to one row of data
+    1. If you have headers, then these must match the names of the column in the final tables
+    1. If you do not have headers, then the schema [detailed in this documentation](understanding_and_ingesting_data.md) and the file must match including column order. If your columns can come in a different order or not all of the columns will be in each file, then you will need to have headers.
+1. `.json`, where each row corresponds to one row of data, and each row is a JSON where the keys are the column names corresponding to each value.
+
+```bash
+# CSV Example
+
+date,price1,price2,price3,price4
+2011-03-01,12.4356,54.3156,8.6311,134.3651
+2011-03-02,12.5645,54.3548,8.6531,132.4561
+2011-03-03,13.1255,54.5688,8.6136,133.4171
+2011-03-04,12.9865,54.4658,8.6121,134.8751
+etc. . .
+
+
+# JSON Example
+
+{"date": "2011-03-01", "price1": 12.4356, "price2": 54.3156, "price3": 8.6311, "price4": 134.3651}
+{"date": "2011-03-02", "price1": 12.5645, "price2": 54.3548, "price3": 8.6531, "price4": 132.4561}
+{"date": "2011-03-03", "price1": 13.1255, "price2": 54.5688, "price3": 8.6136, "price4": 133.4171}
+{"date": "2011-03-04", "price1": 12.9865, "price2": 54.4658, "price3": 8.6121, "price4": 134.8751}
+etc. . . 
+
+```
 
 ## How the data pipeline uses this code
 
