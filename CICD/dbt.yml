@@ -34,13 +34,3 @@ jobs:
       az storage blob sync --account-name $DATA_LAKE_NAME_TEST --account-key $DATA_LAKE_KEY_TEST -c dbt -s dbt --only-show-errors
     condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/main'))
     displayName: 'Sync the repository files to the test data lake'
-
-  # Deploy to Production
-  - script: |
-      az login --identity --username $(USER_ASSIGNED_MANAGED_IDENTITY_PROD)
-      DATA_LAKE_NAME_PROD=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name data-lake-name-prod  --query 'value' -o tsv)
-      # We have to use the account key while the sync command doesn't support managed identites
-      DATA_LAKE_KEY_PROD=$(az storage account keys list --account-name $DATA_LAKE_NAME_PROD --query '[0].value' -o tsv)
-      az storage blob sync --account-name $DATA_LAKE_NAME_PROD --account-key $DATA_LAKE_KEY_PROD -c dbt -s dbt --only-show-errors
-    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/main'))
-    displayName: 'Sync the repository files to the production data lake'

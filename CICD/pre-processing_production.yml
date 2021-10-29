@@ -1,7 +1,4 @@
-trigger:
-  paths:
-    include:
-    - pre_process/
+trigger: None
 
 pool: 'DevOps Deployment'
 
@@ -38,18 +35,10 @@ jobs:
       artifact: package
       path: dist
 
-  # Deploy to Dev
+  # Deploy to Production
   - script: |
-      az login --identity --username $(USER_ASSIGNED_MANAGED_IDENTITY_DEV)
-      DATA_LAKE_NAME_DEV=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name data-lake-name-dev --query 'value' -o tsv)
-      az storage blob upload --auth-mode login --account-name $DATA_LAKE_NAME_DEV -f dist/pre_process-1.0.0-py3-none-any.whl -c utilities -n pre_process/pre_process-1.0.0-py3-none-any.whl
-    condition: and(succeeded(), ne(variables['build.sourceBranch'], 'refs/heads/main'))
-    displayName: Upload pre-processing package to dev data lake
-
-  # Deploy to Test
-  - script: |
-      az login --identity --username $(USER_ASSIGNED_MANAGED_IDENTITY_TEST)
-      DATA_LAKE_NAME_TEST=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name data-lake-name-test --query 'value' -o tsv)
-      az storage blob upload --auth-mode login --account-name $DATA_LAKE_NAME_TEST -f dist/pre_process-1.0.0-py3-none-any.whl -c utilities -n pre_process/pre_process-1.0.0-py3-none-any.whl
+      az login --identity --username $(USER_ASSIGNED_MANAGED_IDENTITY_PROD)
+      DATA_LAKE_NAME_PROD=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name data-lake-name-prod --query 'value' -o tsv)
+      az storage blob upload --auth-mode login --account-name $DATA_LAKE_NAME_PROD -f dist/pre_process-1.0.0-py3-none-any.whl -c utilities -n pre_process/pre_process-1.0.0-py3-none-any.whl
     condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/main'))
-    displayName: Upload pre-processing package to test data lake
+    displayName: Upload pre-processing package to production data lake
