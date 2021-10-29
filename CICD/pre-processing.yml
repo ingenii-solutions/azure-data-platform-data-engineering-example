@@ -1,0 +1,30 @@
+trigger:
+  paths:
+    include:
+    - pre_process/
+
+pool: devops_deployment
+
+variables: 
+- template: variables.yml
+
+jobs:
+- job: build
+  steps:
+  - template: pre-processing_template_build.yml
+
+- job: upload
+  dependsOn: build
+  steps:
+  - template: pre-processing_template_prepare.yml
+
+  - ${{ if ne(variables['build.sourceBranch'], 'refs/heads/main') }}:
+    - template: pre-processing_template_upload.yml
+      parameters:
+        environment: 'dev'
+        user_assigned_managed_identity_id: $(USER_ASSIGNED_MANAGED_IDENTITY_DEV)
+  - ${{ if eq(variables['build.sourceBranch'], 'refs/heads/main') }}:
+    - template: pre-processing_template_upload.yml
+      parameters:
+        environment: 'test'
+        user_assigned_managed_identity_id: $(USER_ASSIGNED_MANAGED_IDENTITY_TEST)
