@@ -3,42 +3,19 @@ trigger: None
 pool: 'DevOps Deployment'
 
 variables: 
-- group: 'Managed Identity IDs'
-- group: 'Configuration Registry'
+- template: variables.yml
 
 jobs:
 - job: build
   steps:
-  - script: |
-      # https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/python.sh
-      sudo apt-get install -y python3 python3-dev python3-pip python3-venv
-      pip3 install -r requirements-dev.txt
-    displayName: 'Install dependencies'
-  - script: python3 pre_process/setup.py bdist_wheel
-    displayName: 'Build pre-processing package'
-  - task: CopyFiles@2
-    displayName: 'Copy package for later in the pipeline'
-    inputs:
-      contents: 'dist/**'
-      targetFolder: '$(Build.ArtifactStagingDirectory)'
-  - publish: '$(Build.ArtifactStagingDirectory)/dist'
-    displayName: 'Publish package for later use'
-    artifact: package
+  - template: pre-processing_template_build.yml
 
 - job: upload
   dependsOn: build
   steps:
-  - script: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-    displayName: Install az cli
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      artifact: package
-      path: dist
+  - template: pre-processing_template_prepare.yml
 
-  # Deploy to Production
-  - script: |
-      az login --identity --username $(USER_ASSIGNED_MANAGED_IDENTITY_PROD)
-      DATA_LAKE_NAME_PROD=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name data-lake-name-prod --query 'value' -o tsv)
-      az storage blob upload --auth-mode login --account-name $DATA_LAKE_NAME_PROD -f dist/pre_process-1.0.0-py3-none-any.whl -c utilities -n pre_process/pre_process-1.0.0-py3-none-any.whl
-    condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/main'))
-    displayName: Upload pre-processing package to production data lake
+  - template: pre-processing_template_upload.yml
+    parameters:
+      environment: 'prod'
+      user_assigned_managed_identity_id: $(USER_ASSIGNED_MANAGED_IDENTITY_PROD)

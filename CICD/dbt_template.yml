@@ -1,0 +1,15 @@
+parameters:
+- name: environment
+  type: string
+- name: user_assigned_managed_identity_id
+  type: string
+
+steps:
+- bash: echo 'Deploying to the ${{ parameters.environment }} environment'
+- script: |
+    az login --identity --username ${{ parameters.user_assigned_managed_identity_id }}
+    DATA_LAKE_NAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name data-lake-name-${{ parameters.environment }}  --query 'value' -o tsv)
+    # We have to use the account key while the sync command doesn't support managed identites
+    DATA_LAKE_Key=$(az storage account keys list --account-name $DATA_LAKE_NAME --query '[0].value' -o tsv)
+    az storage blob sync --account-name $DATA_LAKE_NAME --account-key $DATA_LAKE_Key -c dbt -s dbt --only-show-errors
+  displayName: 'Sync the repository files to the data lake'
