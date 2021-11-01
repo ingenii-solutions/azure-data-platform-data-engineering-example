@@ -1,13 +1,16 @@
 # New Data Source
 
-This document outlines how to get a new data source into your Ingenii Azure Data Platform: from obtaining the data with Data Factory pipelines, to pre-processing the raw data if required, to defining the data schema so the platform can ingest this data and create the resulting tables in Databricks.
+This document details all the code and configuration changes you need to make to your Data Engineering repository to get a new data source into your Ingenii Azure Data Platform. The full data pipeline is detailed below, and we have full explanations of the first stages: from obtaining the data with Data Factory pipelines, to pre-processing the raw data if required, to defining the data schema so the platform can ingest this data and create the resulting tables in Databricks.
 
-If we want to ingest new data into the platform we need to set the configuration so the platform can understand this new data. If a file is uploaded into the `raw` container in the data lake the platform will try to ingest it, and will refer to the `dbt` and `pre_process` information to understand how to read, process, and test the data in the file.
-
-- [Working with the Data Engineering repository](#working-with-the-data-engineering-repository) - Recommended programs and approach for working with this repository
-- [Creating a new pipeline to get data](#creating-a-new-pipeline-to-get-data) - Pulling raw data into your cloud environment
-- [Pre-processing the raw data](#pre-processing-the-raw-data) - Getting the raw data into an acceptable form
-- [Understanding and ingesting into the platform](#understanding-and-ingesting-into-the-platform) - Setting the metadata so the platform can ingest your data
+The full data pipeline is:
+1. Pulling raw data into the Data Lake, with Data Factory or similar: [Creating a new pipeline to get data](#creating-a-new-pipeline-to-get-data)
+1. Pre-processing the data so that it can be ingested into the platform: [Pre-processing the raw data](#pre-processing-the-raw-data)
+1. Reading the metadata so the platform understands how to ingest and test the data: [Understanding and ingesting into the platform](#understanding-and-ingesting-into-the-platform)
+1. For each file, all detailed elsewhere:
+   1. Ingesting the file's data into an individual table
+   2. Testing this data
+   3. Moving problem data to a separate table
+   4. Moving the successful data into the overall table
 
 ## Working with the Data Engineering repository
 
@@ -34,14 +37,14 @@ More details about the CI/CD pipelines can be found in the [CI/CD documentation]
 
 ## Creating a new pipeline to get data
 
-Once you've decided what data you want to pull into the platform the first step is to get it into your Azure cloud environment. The goal of this step is to get files (.csv, .json) into the `raw` container of the data lake so that they can be ingested. The files need to be added to the folder path `<data provider name>/<table name>`, where each file has a unique name within this folder. More details about why this is crucial is covered in the `Understanding and ingesting into the platform` section.
+The first step to pull data into the platform is to get files (.csv, .json) uploaded into the `raw` container of your data lake. The files need to be added to the folder path `<data provider name>/<table name>`, where each file has a unique name within this folder. More details about why this is crucial is covered in the `Understanding and ingesting into the platform` section.
 
-If you already have a system for getting the files into the right place, then once you've got it set up you can move to the next section. However, if you need a pipeline to obtain the data, then you may be able to use the Azure Data Factory Generator. The steps to add or update a data source are in the [Pipeline Generation](./pipeline_generation.md) documentation.
+If you already have a system for getting the files into the right place, then once you've got it set up you can move to the next section. However, if you need a pipeline to obtain the data, then you may be able to use the [Azure Data Factory Generator](https://github.com/ingenii-solutions/azure-data-factory-generator). The steps to add or update a data source are in the [Pipeline Generation](./Pipeline_Generation.md) documentation.
 
 ## Pre-processing the raw data
 
-Currently, the data platform can only ingest files in a few forms, and it's likely that the raw data you receive from your data file needs to be changed to match these forms. If this is the case, then the pre-processing step is where you can add python code which the data pipeline will run against your files before they are ingested into the platform. Full details about how this works and how you can add your code can be found in the [Pre-Processing](./pre_process.md) documentation.
+Currently, the data platform can only ingest files in a few forms, and it's likely that the raw data you receive from your data file needs to be changed to match. In the pre-processing step is where you can add python code which the data pipeline will run against your files before they are ingested into the platform. Full details about how this works and how you can add your code can be found in the [Pre-Processing](./Pre-Process.md) documentation.
 
 ## Understanding and ingesting into the platform
 
-The final section that needs to be configured is setting definitions so that the platform can both read the source files and set the properties of the tables in the Databricks environment. Full details can be found in the [Understanding and Ingesting Data](./Understanding_and_Ingesting_Data.md) documentation.
+The final section that needs to be configured is the metadata so that the platform can both read the source files and create the overall tables in the Databricks environment. Full details can be found in the [Understanding and Ingesting Data](./Understanding_and_Ingesting_Data.md) documentation.

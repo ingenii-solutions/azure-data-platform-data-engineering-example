@@ -1,10 +1,16 @@
 # Pre-Processing
 
-The pre-processing stage of the data pipeline determines whether a raw file needs to be rewritten before it is ingested in the data platform. We can use this step to get the file into a state that can be easily ingested. Some examples of changes are:
+For every raw data file, after uploading it to the data lake but before ingesting into the data platform, the pre-processing stage can rewrite the file into a state that can be easily ingested. Some examples of changes are:
  - Changing column names in a .csv to match the schema we want
  - Reforming a .json file into a form that can be ingested, by taking a complex object and simplifying it
  - Pulling only the relevant information from a .json file and creating a .csv to make ingestion easier
-In this `pre_process` folder we keep the code that needs to be run at this stage.
+In the `pre_process` folder of the repository we keep the code that needs to be run to pre-process the files, which is all in `python`. To handle a lot of boilerplate code, the `PreProcess` object is provided to make reading and writing your files easier, so all you have to provide is your data-specific code; this is detailed in the [Development](#development) section below.
+
+- [Possible Data File Forms](#possible-data-file-forms) - The forms of data the platform can accept
+- [How the data pipeline uses this code](#how-the-data-pipeline-uses-this-code) - How the code is executed against the raw file
+- [Functions](#functions) - Your functions to rewrite the data
+- [Development](#development) - Developing your functions locally, and using the `PreProcess` object
+- [Deployment](#deployment) - Deploying your code to be available to the data platform
 
 ## Possible Data File Forms
 
@@ -39,13 +45,13 @@ etc. . .
 
 ## How the data pipeline uses this code
 
-The steps the pipeline takes are:
+In order to use your pr-processing code, the steps the pipeline takes are:
 1. When the cluster is starting, it installs your `pre-processing` package generated from your version of this repositry.
 1. Import the `find_pre_process_function` dictionary from the `root.py` file
 1. The name of the data provider and table is passed as the two arguments of this function.
 1. If a value is returned, this needs to be a function. Details of the requirements of this function is in the section below.
 
-## Example files
+### Example files
 
 Example root.py file:
 ```python
@@ -68,7 +74,7 @@ When the function is triggered, its only argument is an object that contains the
 
 ## Development
 
-To develop your own pre-processing functions, we can use a file local to your development machine, and then create a `PreProcess` object in `development` mode. This PreProcess object needs to refer to the `dbt` folder also in this repository, so the below example is assumed to be a file at the root of this repository: 
+To develop your own pre-processing functions, we can use a file local to your development machine, and then create a `PreProcess` object in `development` mode. This PreProcess object needs access to the `dbt` folder also in this repository, so the below example is assumed to be a file at the root of this repository: 
 
 ```python
 from my_file import my_function
@@ -81,9 +87,9 @@ my_function(pre_process_obj) # Did it do what I expected?
 
 ## Deployment
 
-This code is deployed to the environment by creating a Python pacakge and uploading this to the platform data lake `utilities` container so it is available to the Databricks engineering cluster to be installed. A package must be available to the container regardless of whether there are any pre-processing functions.
+This code is deployed to the environment by creating a Python pacakge and uploading this to the platform data lake `utilities` container; this makes it is available to the Data Platform Databricks engineering cluster to use the code. The cluster expects a package to be present, and so must be uploaded to the container regardless of whether there are any pre-processing functions or not.
 
-The creation and uploading of the package will be handled by the CI/CD pipeline, but in case you need to do this manually the steps are as follows. From the context of the root of the repository, the package is created with the command
+The creation and uploading of the package will be handled by the CI/CD pipelines in the `CICD` folder, all files starting with `pre-processing`, but in case you need to do this manually the steps are as follows. From the context of the root of the repository, the package is created with the command
 ```bash
 python pre_process/setup.py bdist_wheel
 ```

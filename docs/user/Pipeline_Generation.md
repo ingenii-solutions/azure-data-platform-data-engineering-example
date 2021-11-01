@@ -6,13 +6,6 @@ All files that should be ingested into the platform need to be uploaded to the `
 
 Every `.json` file in the `pipeline_generation` folder corresponds to an individual data source; several tables can be defined in one file. The steps to follow are:
 
-
-When your configuration is set correctly, run the command:
-```
-make create-data-factory-objects
-```
-This will create or update any objects within the `pipeline_generation/` folder, in sub-folders specific to the object type, which will need to be deployed to the relevant Data Factory resources.
-
 1. Check the [Azure Data Factory Generator documentation](https://github.com/ingenii-solutions/azure-data-factory-generator/blob/main/docs/user/ADFGUSAGE.md) to see if it supports the type of connector you need to use, such as SFTP or a type of API call. If it's not there, please [raise an issue on the GitHib page](https://github.com/ingenii-solutions/azure-data-factory-generator/issues) so we know to add it in.
 1. Create any required resources, such as adding a password to the relevant Azure Key Vault so that the pipelines can access it.
 1. In the `pipeline_generation` folder, if you want to add a new data source then create a new file, and if you want to update an existing data source by adding tables or changing the configuration.
