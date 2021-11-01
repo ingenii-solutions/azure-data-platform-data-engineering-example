@@ -1,25 +1,24 @@
 # New Data Source
 
-- [New Data Source](#new-data-source)
-  - [Tools required](#tools-required)
-  - [Working with the Data Engineering repository](#working-with-the-data-engineering-repository)
-  - [Creating a new pipeline to get data](#creating-a-new-pipeline-to-get-data)
-  - [Pre-processing the raw data](#pre-processing-the-raw-data)
-  - [Understanding and ingesting into the platform](#understanding-and-ingesting-into-the-platform)
-
 This document outlines how to get a new data source into your Ingenii Azure Data Platform: from obtaining the data with Data Factory pipelines, to pre-processing the raw data if required, to defining the data schema so the platform can ingest this data and create the resulting tables in Databricks.
 
 If we want to ingest new data into the platform we need to set the configuration so the platform can understand this new data. If a file is uploaded into the `raw` container in the data lake the platform will try to ingest it, and will refer to the `dbt` and `pre_process` information to understand how to read, process, and test the data in the file.
 
-## Tools required
-
-Azure CLI
-git
-make
-
-
+- [Working with the Data Engineering repository](#working-with-the-data-engineering-repository) - Recommended programs and approach for working with this repository
+- [Creating a new pipeline to get data](#creating-a-new-pipeline-to-get-data) - Pulling raw data into your cloud environment
+- [Pre-processing the raw data](#pre-processing-the-raw-data) - Getting the raw data into an acceptable form
+- [Understanding and ingesting into the platform](#understanding-and-ingesting-into-the-platform) - Setting the metadata so the platform can ingest your data
 
 ## Working with the Data Engineering repository
+
+### Tools required
+
+- Operating System: When there is example command line code, it has been written on Linux, specifically `bash`. Windows scripts, either `cmd` or `powershell` or both, will be added soon.
+- [git](https://git-scm.com/): This is a git-based repository, so a familarity with this tool is required
+- [make](https://www.gnu.org/software/make/) (Optional): For using commands defined in the `Makefile`. For Linux, this is included with most distributions. For Windows, [Make for Windows](http://gnuwin32.sourceforge.net/packages/make.htm) can be used.
+- [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/) (Optional): For updating Azure resources or uploading files to storage accounts. This is mainly used by CI/CD pipelines.
+
+### Updating the repository with branches
 
 Following normal git practices, changes to add or update your data sources should be made on a new development branch which gives space to work and test your configuration. This developement branch should be used for changes in all of the 3 sections below.
 
