@@ -20,9 +20,8 @@ If we want to ingest new data into the platform we need to set the configuration
 
 ### Updating the repository with branches
 
-Following normal git practices, changes to add or update your data sources should be made on a new development branch which gives space to work and test your configuration. This developement branch should be used for changes in all of the 3 sections below.
-
-When you're happy with your changes we merge the branch into the `main` branch, signifying that the code is production ready.
+Following normal git practices, changes to add or update your data sources should be made using a branching strategy to test changes before deploying them to your production environment. Azure provides good documentation [for your branching strategy here](https://docs.microsoft.com/en-us/azure/devops/repos/git/git-branching-guidance?view=azure-devops).
+We recommend that adding or updating your data sources by changing the code should happen on a feature branch, which should be used for changes in all of the 3 sections below. These changes can then be deployed to your development environments where you can test that the changes are working as expected. When you're happy with your changes you can open a pull request to merge the branch into the `main` branch, signifying that the code is production ready. From this point CI/CD pipelines or manual deployment steps will move your changes into the production environment.
 
 The overall steps are:
 
@@ -30,6 +29,8 @@ The overall steps are:
 1. Make the required changes to the different files as described in the below sections. Commit and push your changes to the development branch. CI/CD will deploy these changes into your Development environment.
 1. Once you are satisfied with and havbe tested all of your changes, open and merge a pull request between your development branch and the `main` branch.
 1. The CI/CD pipeline will deploy your resources into you production environment.
+
+More details about the CI/CD pipelines can be found in the [CI/CD documentation](./CICD.md).
 
 ## Creating a new pipeline to get data
 
