@@ -1,6 +1,6 @@
-# New Data Source
+# Introduction
 
-This document details all the code and configuration changes you need to make to your Data Engineering repository to get a new data source into your Ingenii Azure Data Platform. The full data pipeline is detailed below, and we have full explanations of the first stages: from obtaining the data with Data Factory pipelines, to pre-processing the raw data if required, to defining the data schema so the platform can ingest this data and create the resulting tables in Databricks.
+This repository holds all of the configuration for how to ingest your data into your Ingenii Azure Data Platform. In this document, and others that this links to, we provide a guide to working with the repository, and how to get a new data source into the platform so you can work with the data in Databricks.
 
 The full data pipeline is:
 1. Pulling raw data into the Data Lake, with Data Factory or similar: [Creating a new pipeline to get data](#creating-a-new-pipeline-to-get-data)
