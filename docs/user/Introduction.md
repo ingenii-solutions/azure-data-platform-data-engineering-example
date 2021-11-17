@@ -23,7 +23,10 @@ The full data pipeline covers:
 
 ### Updating the repository with branches
 
-Following normal git practices, changes to add or update your data sources should be made using a branching strategy, allowing you to make and test changes before merging to your `main` branch and  deploying to your production environment. Azure provides good documentation [for your branching strategy here](https://docs.microsoft.com/en-us/azure/devops/repos/git/git-branching-guidance?view=azure-devops).
+Here we don't intend to give you a full explanation of how git works, as there's plenty of good resources already written that don't need repeating. We do want to give our recommended approach to interact with the repository, but feel free to use your own system, or any others such as [git Flow](https://nvie.com/posts/a-successful-git-branching-model/).
+
+Changes to add or update your data sources should be made using a branching strategy, allowing you to make and test changes before merging to your `main` branch and  deploying to your production environment. Azure provides good documentation [for your branching strategy here](https://docs.microsoft.com/en-us/azure/devops/repos/git/git-branching-guidance?view=azure-devops).
+
 We recommend that adding or updating your data sources by changing the code should happen on a feature branch, which should be used for all required changes in the 3 sections below. These changes can then be deployed to your development environment where you can test that they are working as expected, after which you can open a pull request to merge the feature branch into the `main` branch, signifying that the code is production ready. At each stage CI/CD pipelines will move your changes into the production environment.
 
 The overall steps are:
