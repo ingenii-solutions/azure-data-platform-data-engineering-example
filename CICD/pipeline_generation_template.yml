@@ -1,0 +1,46 @@
+parameters:
+- name: environment
+  type: string
+- name: user_assigned_managed_identity_id
+  type: string
+
+steps:
+- bash: echo 'Deploying to the ${{ parameters.environment }} environment'
+- script: az login --identity --username ${{ parameters.user_assigned_managed_identity_id }}
+  displayName: 'Get Azure credentials'
+- script: |
+    DATA_FACTORY_NAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name data-factory-name-${{ parameters.environment }}  --query 'value' -o tsv)
+    echo "##vso[task.setvariable variable=DATA_FACTORY_NAME]$DATA_FACTORY_NAME"
+  displayName: 'Get the Data Factory Name'
+- script: |
+    RESOURCE_GROUP_NAME=$(az datafactory list --query "[?name==\`$DATA_FACTORY_NAME\`].resourceGroup" -o tsv)
+    echo "##vso[task.setvariable variable=RESOURCE_GROUP_NAME]$RESOURCE_GROUP_NAME"
+  displayName: 'Get the Data Factory Name'
+- script: |
+    # Get the file name from the path
+    function getName() {
+      echo "$1" | awk -F '/' '{ print $2 }' | sed 's/.json//'
+    }
+
+    find integrationRuntime -type f -name "*.json" -print0 | while IFS= read -r -d '' file; do
+      if [[ $(cat "$file" | jq '.properties.type' | sed 's/"//g') == "SelfHosted" ]] 
+      then
+        az datafactory integration-runtime self-hosted create --resource-group "$RESOURCE_GROUP_NAME" --factory-name "$DATA_FACTORY_NAME" --integration-runtime-name "$(getName "$file")"
+      fi
+    done
+
+    find linkedService -type f -name "*.json" -print0 | while IFS= read -r -d '' file; do
+      az datafactory linked-service create --resource-group "$RESOURCE_GROUP_NAME" --factory-name "$DATA_FACTORY_NAME" --linked-service-name "$(getName "$file")" --properties "$(cat "$file" | jq '.properties')"
+    done
+
+    find dataset -type f -name "*.json" -print0 | while IFS= read -r -d '' file; do
+      az datafactory dataset create --resource-group "$RESOURCE_GROUP_NAME" --factory-name "$DATA_FACTORY_NAME" --dataset-name "$(getName "$file")" --properties "$(cat "$file" | jq '.properties')"
+    done
+
+    find pipeline -type f -name "*.json" -print0 | while IFS= read -r -d '' file; do
+      az datafactory pipeline create --resource-group "$RESOURCE_GROUP_NAME" --factory-name "$DATA_FACTORY_NAME" --name "$(getName "$file")" --pipeline "$(cat "$file" | jq '.properties')"
+    done
+
+    find trigger -type f -name "*.json" -print0 | while IFS= read -r -d '' file; do
+      az datafactory trigger create --resource-group "$RESOURCE_GROUP_NAME" --factory-name "$DATA_FACTORY_NAME" --trigger-name "$(getName "$file")" --properties "$(cat "$file" | jq '.properties')"
+    done
