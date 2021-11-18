@@ -1,4 +1,4 @@
-trigger: None
+trigger: none
 
 pool: 'DevOps Deployment'
 
