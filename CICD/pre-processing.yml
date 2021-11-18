@@ -3,7 +3,7 @@ trigger:
     include:
     - pre_process/
 
-pool: devops_deployment
+pool: 'DevOps Deployment'
 
 variables: 
 - template: variables.yml

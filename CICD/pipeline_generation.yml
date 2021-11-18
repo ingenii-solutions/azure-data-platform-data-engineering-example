@@ -1,7 +1,7 @@
 trigger:
   paths:
     include:
-    - dbt/
+    - pipeline_generation/
 
 pool: 'DevOps Deployment'
 
@@ -12,16 +12,22 @@ steps:
 - script: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
   displayName: Install az cli
 
+- script: az config set extension.use_dynamic_install=yes_without_prompt
+  displayName: Allow installation of extensions automatically
+
+- script: sudo apt-get install -y jq
+  displayName: Install jq
+
 # Deploy to Dev
 - ${{ if ne(variables['build.sourceBranch'], 'refs/heads/main') }}:
-  - template: dbt_template.yml
+  - template: pipeline_generation_template.yml
     parameters:
       environment: 'dev'
       user_assigned_managed_identity_id: $(USER_ASSIGNED_MANAGED_IDENTITY_DEV)
 
 # Deploy to Test
 - ${{ if eq(variables['build.sourceBranch'], 'refs/heads/main') }}:
-  - template: dbt_template.yml
+  - template: pipeline_generation_template.yml
     parameters:
       environment: 'test'
       user_assigned_managed_identity_id: $(USER_ASSIGNED_MANAGED_IDENTITY_TEST)

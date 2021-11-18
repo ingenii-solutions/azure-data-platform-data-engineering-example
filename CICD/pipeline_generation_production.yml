@@ -10,7 +10,7 @@ steps:
   displayName: Install az cli
 
 # Deploy to the data lake
-- template: dbt_template.yml
+- template: pipeline_generation_template.yml
   parameters:
     environment: 'prod'
     user_assigned_managed_identity_id: $(USER_ASSIGNED_MANAGED_IDENTITY_PROD)
