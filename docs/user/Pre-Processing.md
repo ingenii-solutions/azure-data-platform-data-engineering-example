@@ -1,8 +1,8 @@
 # Pre-Processing
 
-For every raw data file, after uploading it to the data lake but before ingesting into the data platform, the pre-processing stage can rewrite the file into a state that can be easily ingested. Some examples of changes are:
+The data we obtain from a data provider may not come the form we want; for every raw data file, after uploading it to the data lake but before ingesting into the data platform, the pre-processing stage can rewrite the file into a state that can be easily ingested. Some examples of changes are:
  - Changing column names in a .csv to match the schema we want
- - Reforming a .json file into a form that can be ingested, by taking a complex object and simplifying it
+ - Reforming a .json file by taking a complex object and simplifying it
  - Pulling only the relevant information from a .json file and creating a .csv to make ingestion easier
 In the `pre_process` folder of the repository we keep the code that needs to be run to pre-process the files, which is all in `python`. To handle a lot of boilerplate code, the `PreProcess` object is provided to make reading and writing your files easier, so all you have to provide is your data-specific code; this is detailed in the [Development](#development) section below.
 
