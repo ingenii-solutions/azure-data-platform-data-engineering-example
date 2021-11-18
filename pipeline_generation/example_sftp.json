@@ -1,0 +1,20 @@
+{
+    "name": "example",
+    "connection": "sftp",
+    "authentication": "basic",
+    "config": {
+        "host": "example.sftp.com",
+        "username": "example-username",
+        "key_vault_secret_name": "example-password"
+    },
+    "schedule": {
+        "recurrence": "day",
+        "time": "06:00"
+    },
+    "tables": [
+        {
+            "name": "example-sftp",
+            "path": "/"
+        }
+    ]
+}
