@@ -6,9 +6,6 @@ variables:
 - template: variables.yml
 
 steps:
-- script: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-  displayName: Install az cli
-
 # Deploy to the data lake
 - template: dbt_template.yml
   parameters:

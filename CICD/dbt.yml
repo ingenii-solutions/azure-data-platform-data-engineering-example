@@ -9,9 +9,6 @@ variables:
 - template: variables.yml 
 
 steps:
-- script: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-  displayName: Install az cli
-
 # Deploy to Dev
 - ${{ if ne(variables['build.sourceBranch'], 'refs/heads/main') }}:
   - template: dbt_template.yml

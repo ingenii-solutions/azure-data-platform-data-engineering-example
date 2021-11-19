@@ -9,15 +9,6 @@ variables:
 - template: variables.yml 
 
 steps:
-- script: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-  displayName: Install az cli
-
-- script: az config set extension.use_dynamic_install=yes_without_prompt
-  displayName: Allow installation of extensions automatically
-
-- script: sudo apt-get install -y jq
-  displayName: Install jq
-
 # Deploy to Dev
 - ${{ if ne(variables['build.sourceBranch'], 'refs/heads/main') }}:
   - template: pipeline_generation_template.yml
