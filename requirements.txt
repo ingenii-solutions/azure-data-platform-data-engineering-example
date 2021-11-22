@@ -1,2 +1,2 @@
-azure_data_factory_generator
-ingenii_data_engineering
+azure_data_factory_generator>=0.1.4
+ingenii_data_engineering>=0.3.0

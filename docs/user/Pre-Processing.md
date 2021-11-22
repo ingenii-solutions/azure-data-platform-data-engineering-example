@@ -53,7 +53,7 @@ In order to use your pre-processing code, the steps the pipeline takes are:
 
 ### Example files
 
-The `root.py` file can be found at `pre_process/pre_process/root.py`, and is used to determine which pre-processing function should be applied to a file, if any:
+The `root.py` file can be found at `pre_process/root.py`, and is used to determine which pre-processing function should be applied to a file, if any:
 ```python
 from functions import json_to_csv, other_function
 def find_pre_process_function(data_provider: str, table_name: str
@@ -77,8 +77,8 @@ When the function is triggered, its only argument is an instantiated version of 
 To develop your own pre-processing functions, we can use a file local to your development machine, and then create a `PreProcess` object in `development` mode; an example python script to do this is below. The `PreProcess` object needs access to the `dbt` folder also in this repository, so the below example is assumed to be a file at the root of this repository: 
 
 ```python
-from my_file import my_function
-from ingenii_databricks.pre_process import PreProcess
+from pre_process.functions import my_function
+from ingenii_data_engineering.pre_process import PreProcess
 
 pre_process_obj = PreProcess("data_provider", "table", "path/to/file.json",
                              development_dbt_root="dbt")
@@ -93,7 +93,7 @@ The creation and uploading of the package will be handled by the CI/CD pipelines
 
 1. From the context of the root of the repository, the package is created with the command
 ```bash 
-python pre_process/setup.py bdist_wheel
+python -m ingenii_data_engineering pre_processing_package pre_process
 ```
 2. This will create a `pre_process-1.0.0-py3-none-any.whl` file in the `dist` folder in the root of your repository. This folder will be created if it doesn't already exist. `build` and `pre_process.egg-info` folders are also created with files we won't need, and all 3 folder are ignored by the `.gitignore` file and should not be committed to the repository.
 
