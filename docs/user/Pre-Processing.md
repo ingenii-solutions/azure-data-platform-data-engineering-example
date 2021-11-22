@@ -93,7 +93,7 @@ The creation and uploading of the package will be handled by the CI/CD pipelines
 
 1. From the context of the root of the repository, the package is created with the command
 ```bash 
-python pre_process/setup.py bdist_wheel
+python -m ingenii_data_engineering pre_processing_package pre_process
 ```
 2. This will create a `pre_process-1.0.0-py3-none-any.whl` file in the `dist` folder in the root of your repository. This folder will be created if it doesn't already exist. `build` and `pre_process.egg-info` folders are also created with files we won't need, and all 3 folder are ignored by the `.gitignore` file and should not be committed to the repository.
 
