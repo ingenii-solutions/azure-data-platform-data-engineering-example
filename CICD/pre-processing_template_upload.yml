@@ -8,6 +8,10 @@ steps:
 - bash: echo 'Deploying to the ${{ parameters.environment }} environment'
 - script: |
     az login --identity --username ${{ parameters.user_assigned_managed_identity_id }}
+
+    # Get and check the data lake name
     DATA_LAKE_NAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name data-lake-name-${{ parameters.environment }} --query 'value' -o tsv)
+    test "$DATA_LAKE_NAME" || exit 1
+    
     az storage blob upload --auth-mode login --account-name $DATA_LAKE_NAME -f dist/pre_process-1.0.0-py3-none-any.whl -c utilities -n pre_process/pre_process-1.0.0-py3-none-any.whl
   displayName: Upload pre-processing package to the data lake
