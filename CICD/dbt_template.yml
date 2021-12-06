@@ -9,9 +9,10 @@ steps:
   displayName: Install az cli
 
 - bash: echo 'Deploying to the ${{ parameters.environment }} environment'
-- script: |
-    az login --identity --username ${{ parameters.user_assigned_managed_identity_id }}
+- bash: az login --identity --username ${{ parameters.user_assigned_managed_identity_id }}
+  displayName: 'Log in with managed identity'
 
+- script: |
     # Get and check the data lake name
     DATA_LAKE_NAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name data-lake-name-${{ parameters.environment }} --query 'value' -o tsv)
     test "$DATA_LAKE_NAME" || exit 1
@@ -23,3 +24,49 @@ steps:
 
     az storage blob sync --account-name $DATA_LAKE_NAME --account-key $DATA_LAKE_KEY -c dbt -s dbt --only-show-errors
   displayName: 'Sync the repository files to the data lake'
+
+- script: |
+    DBT_DOCUMENTATION_ENABLED=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name dbt-docs-enabled-${{ parameters.environment }} --query 'value' -o tsv)
+    test "$DBT_DOCUMENTATION_ENABLED" || exit 1
+
+    echo $DBT_DOCUMENTATION_ENABLED
+    echo "##vso[task.setvariable variable=DBT_DOCUMENTATION_ENABLED]$DBT_DOCUMENTATION_ENABLED"
+
+  displayName: 'Find if we need to deploy the dbt documentation'
+
+- script: |
+    # https://docs.microsoft.com/en-us/azure/static-web-apps/publish-devops
+    DBT_DOCUMENTATION_NAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name dbt-docs-name-${{ parameters.environment }} --query 'value' -o tsv)
+    echo "##vso[task.setvariable variable=DBT_DOCUMENTATION_ENABLED]$DBT_DOCUMENTATION_ENABLED"
+
+    DBT_DOCUMENTATION_TOKEN=$(az staticwebapp secrets list --name $DBT_DOCUMENTATION_NAME --query 'value' -o tsv)
+    echo "##vso[task.setvariable variable=DBT_DOCUMENTATION_TOKEN]$DBT_DOCUMENTATION_TOKEN"
+
+    DATABRICKS_WORKSPACE_HOSTNAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name databricks-engineering-workspace-hostname-${{ parameters.environment }} --query 'value' -o tsv)
+    echo "##vso[task.setvariable variable=DATABRICKS_WORKSPACE_URL]$DATABRICKS_WORKSPACE_HOSTNAME"
+
+    DATABRICKS_CLUSTER_NAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name databricks-engineering-cluster-name-${{ parameters.environment }} --query 'value' -o tsv)
+    echo "##vso[task.setvariable variable=DATABRICKS_CLUSTER_NAME]$DATABRICKS_CLUSTER_NAME"
+
+    CREDENTIAL_KEY_VAULT_NAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name credential-key-vault-name-${{ parameters.environment }} --query 'value' -o tsv)
+    echo "##vso[task.setvariable variable=CREDENTIAL_KEY_VAULT_NAME]$CREDENTIAL_KEY_VAULT_NAME"
+
+    DATABRICKS_DBT_TOKEN=$(az keyvault secret show --vault-name $(CREDENTIAL_KEY_VAULT_NAME) --name engineering-token-for-dbt --query 'value' -o tsv)
+    echo "##vso[task.setvariable variable=DATABRICKS_DBT_TOKEN]$DATABRICKS_DBT_TOKEN"
+
+  displayName: 'Get the different pieces'
+
+- script: |
+    pip3 install dbt
+    cd dbt
+    dbt docs generate --profiles-dir .
+    cd ../
+  displayName: 'Install dbt and create docs'
+
+- task: AzureStaticWebApp@0
+  inputs:
+    app_location: 'dbt/target'
+    api_location: ''
+    output_location: ''
+    azure_static_web_apps_api_token: $(DATABRICKS_DBT_TOKEN)
+  displayName: 'Deploy the documentation'
