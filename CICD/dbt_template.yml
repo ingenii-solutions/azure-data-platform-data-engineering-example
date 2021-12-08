@@ -29,44 +29,72 @@ steps:
     DBT_DOCUMENTATION_ENABLED=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name dbt-docs-enabled-${{ parameters.environment }} --query 'value' -o tsv)
     test "$DBT_DOCUMENTATION_ENABLED" || exit 1
 
-    echo $DBT_DOCUMENTATION_ENABLED
     echo "##vso[task.setvariable variable=DBT_DOCUMENTATION_ENABLED]$DBT_DOCUMENTATION_ENABLED"
 
   displayName: 'Find if we need to deploy the dbt documentation'
 
 - script: |
-    # https://docs.microsoft.com/en-us/azure/static-web-apps/publish-devops
-    DBT_DOCUMENTATION_NAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name dbt-docs-name-${{ parameters.environment }} --query 'value' -o tsv)
-    echo "##vso[task.setvariable variable=DBT_DOCUMENTATION_ENABLED]$DBT_DOCUMENTATION_ENABLED"
+    set -e
 
-    DBT_DOCUMENTATION_TOKEN=$(az staticwebapp secrets list --name $DBT_DOCUMENTATION_NAME --query 'value' -o tsv)
+    echo "Getting the name of the static site . . ."
+    # https://docs.microsoft.com/en-us/azure/static-web-apps/publish-devops
+    DBT_DOCUMENTATION_NAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name "dbt-docs-name-${{ parameters.environment }}" --query 'value' -o tsv)
+    echo "##vso[task.setvariable variable=DBT_DOCUMENTATION_NAME]$DBT_DOCUMENTATION_NAME"
+
+    echo "Getting the token to be able to deploy to the static site . . ."
+    DBT_DOCUMENTATION_TOKEN=$(az staticwebapp secrets list --name $DBT_DOCUMENTATION_NAME --query 'properties.apiKey' -o tsv)
     echo "##vso[task.setvariable variable=DBT_DOCUMENTATION_TOKEN]$DBT_DOCUMENTATION_TOKEN"
 
+    echo "Getting the name of the Databricks workspace . . ."
     DATABRICKS_WORKSPACE_HOSTNAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name databricks-engineering-workspace-hostname-${{ parameters.environment }} --query 'value' -o tsv)
-    echo "##vso[task.setvariable variable=DATABRICKS_WORKSPACE_URL]$DATABRICKS_WORKSPACE_HOSTNAME"
+    echo "##vso[task.setvariable variable=DATABRICKS_WORKSPACE_HOSTNAME]$DATABRICKS_WORKSPACE_HOSTNAME"
 
+    echo "Getting the name of the Databricks cluster . . ."
     DATABRICKS_CLUSTER_NAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name databricks-engineering-cluster-name-${{ parameters.environment }} --query 'value' -o tsv)
     echo "##vso[task.setvariable variable=DATABRICKS_CLUSTER_NAME]$DATABRICKS_CLUSTER_NAME"
 
+    echo "Getting the name of the Key Vault that holds the Databricks token . . ."
     CREDENTIAL_KEY_VAULT_NAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name credential-key-vault-name-${{ parameters.environment }} --query 'value' -o tsv)
     echo "##vso[task.setvariable variable=CREDENTIAL_KEY_VAULT_NAME]$CREDENTIAL_KEY_VAULT_NAME"
 
-    DATABRICKS_DBT_TOKEN=$(az keyvault secret show --vault-name $(CREDENTIAL_KEY_VAULT_NAME) --name engineering-token-for-dbt --query 'value' -o tsv)
+    echo "Getting the Databricks token . . ."
+    DATABRICKS_DBT_TOKEN=$(az keyvault secret show --vault-name $CREDENTIAL_KEY_VAULT_NAME --name engineering-token-for-dbt --query 'value' -o tsv)
     echo "##vso[task.setvariable variable=DATABRICKS_DBT_TOKEN]$DATABRICKS_DBT_TOKEN"
 
+  condition: and(succeeded(), eq(variables['DBT_DOCUMENTATION_ENABLED'], 'true'))
   displayName: 'Get the different pieces'
 
 - script: |
-    pip3 install dbt
+    set -e
+    # https://github.com/actions/virtual-environments/blob/main/images/linux/scripts/installers/python.sh
+    sudo apt-get install -y libpq-dev libsasl2-dev python3 python3-dev python3-pip python3-venv
+    python3 -m pip install --upgrade pip
+    python3 -m pip install dbt dbt-spark[PyHive]
     cd dbt
-    dbt docs generate --profiles-dir .
+    /home/AzDevOps/.local/bin/dbt docs generate --profiles-dir .
     cd ../
+  condition: and(succeeded(), eq(variables['DBT_DOCUMENTATION_ENABLED'], 'true'))
   displayName: 'Install dbt and create docs'
+
+- script: |
+    set -e
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+    sudo apt update
+    sudo apt -y upgrade
+    sudo apt -y autoremove
+    sudo apt install -y docker-ce
+
+    # Allow AzDevOps to access the Docker socket
+    sudo chown root:AzDevOps /run/docker.sock
+  condition: and(succeeded(), eq(variables['DBT_DOCUMENTATION_ENABLED'], 'true'))
+  displayName: 'Install docker'
 
 - task: AzureStaticWebApp@0
   inputs:
     app_location: 'dbt/target'
     api_location: ''
     output_location: ''
-    azure_static_web_apps_api_token: $(DATABRICKS_DBT_TOKEN)
+    azure_static_web_apps_api_token: $(DBT_DOCUMENTATION_TOKEN)
+  condition: and(succeeded(), eq(variables['DBT_DOCUMENTATION_ENABLED'], 'true'))
   displayName: 'Deploy the documentation'
