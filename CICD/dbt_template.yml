@@ -72,6 +72,10 @@ steps:
     python3 -m pip install dbt dbt-spark[PyHive]
     cd dbt
     /home/AzDevOps/.local/bin/dbt docs generate --profiles-dir .
+
+    # Copy static web app configuration
+    cp docs/* target/
+
     cd ../
   condition: and(succeeded(), eq(variables['DBT_DOCUMENTATION_ENABLED'], 'true'))
   displayName: 'Install dbt and create docs'
