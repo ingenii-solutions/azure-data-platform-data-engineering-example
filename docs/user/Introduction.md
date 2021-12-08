@@ -51,3 +51,9 @@ Currently, the data platform can only ingest files in a few forms, and it's like
 ## Understanding and ingesting into the platform
 
 The final section that needs to be configured is the metadata so that the platform can both read the raw files and create the tables in the Databricks environment. Full details can be found in the [Understanding and Ingesting Data](./Understanding_and_Ingesting_Data.md) documentation.
+
+### dbt Documentation
+
+One feature of `dbt` is the [`dbt docs generate`](https://docs.getdbt.com/reference/commands/cmd-docs) command, which will take your `dbt` configuration and generate a website to explore your database and definitions. This is well integrated in the Ingenii Data Platform, where if enabled will create supporting infrastructure to host this website. This affects this repository in 2 ways:
+1. The `dbt/docs` folder, which hosts any files that should be deployed along with the generated documentation for the [Azure Static Web App](https://azure.microsoft.com/en-us/services/app-service/static/). Everything in this folder is included as part of the deployment, so you can add or edit these files if you want to improve this site, for example with a custom 404 webpage.
+1. In the `CICD/dbt_template.yml`, there are extra steps to create and deploy this `dbt` documentation if it is enabled for the platform.
