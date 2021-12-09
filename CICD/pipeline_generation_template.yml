@@ -41,6 +41,8 @@ steps:
       echo "$1" | awk -F '/' '{ print $2 }' | sed 's/.json//'
     }
 
+    set -e
+
     # Get the correct context
     cd pipeline_generation
 
@@ -81,6 +83,8 @@ steps:
       echo "$1" | awk -F '/' '{ print $2 }' | sed 's/.json//'
     }
     export -f getName
+
+    set -e
 
     OIFS=$IFS
     IFS=$'\n'
