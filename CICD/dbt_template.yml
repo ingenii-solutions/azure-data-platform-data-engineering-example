@@ -16,7 +16,7 @@ steps:
     # Get and check the subscription ID
     SUBSCRIPTION_ID=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name subscription-id-${{ parameters.environment }} --query 'value' -o tsv)
     test "$SUBSCRIPTION_ID" || exit 1
-    
+
     echo "##vso[task.setvariable variable=SUBSCRIPTION_ID]$SUBSCRIPTION_ID"
   displayName: 'Get the subscription ID'
 
@@ -27,7 +27,7 @@ steps:
 
     # We have to use the account key while the sync command doesn't support managed identites
     # Get and check the data lake key
-    DATA_LAKE_KEY=$(az storage account keys list  --subscription $SUBSCRIPTION_ID --account-name $DATA_LAKE_NAME --query '[0].value' -o tsv)
+    DATA_LAKE_KEY=$(az storage account keys list --subscription $SUBSCRIPTION_ID --account-name $DATA_LAKE_NAME --query '[0].value' -o tsv)
     test "$DATA_LAKE_KEY" || exit 1
 
     az storage blob sync --account-name $DATA_LAKE_NAME --account-key $DATA_LAKE_KEY -c dbt -s dbt --only-show-errors
@@ -50,7 +50,7 @@ steps:
     echo "##vso[task.setvariable variable=DBT_DOCUMENTATION_NAME]$DBT_DOCUMENTATION_NAME"
 
     echo "Getting the token to be able to deploy to the static site . . ."
-    DBT_DOCUMENTATION_TOKEN=$(az staticwebapp secrets list  --subscription $SUBSCRIPTION_ID --name $DBT_DOCUMENTATION_NAME --query 'properties.apiKey' -o tsv)
+    DBT_DOCUMENTATION_TOKEN=$(az staticwebapp secrets list --subscription $SUBSCRIPTION_ID --name $DBT_DOCUMENTATION_NAME --query 'properties.apiKey' -o tsv)
     echo "##vso[task.setvariable variable=DBT_DOCUMENTATION_TOKEN]$DBT_DOCUMENTATION_TOKEN"
 
     echo "Getting the name of the Databricks workspace . . ."
