@@ -28,8 +28,16 @@ steps:
   displayName: 'Get the Data Factory name'
 
 - script: |
+    # Get and check the subscription ID
+    SUBSCRIPTION_ID=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name subscription-id-${{ parameters.environment }} --query 'value' -o tsv)
+    test "$SUBSCRIPTION_ID" || exit 1
+
+    echo "##vso[task.setvariable variable=SUBSCRIPTION_ID]$SUBSCRIPTION_ID"
+  displayName: 'Get the Subscription ID'
+
+- script: |
     # Get and check the resource group name
-    RESOURCE_GROUP_NAME=$(az datafactory list --query "[?name==\`$DATA_FACTORY_NAME\`].resourceGroup" -o tsv)
+    RESOURCE_GROUP_NAME=$(az datafactory list --subscription $SUBSCRIPTION_ID --query "[?name==\`$DATA_FACTORY_NAME\`].resourceGroup" -o tsv)
     test "$RESOURCE_GROUP_NAME" || exit 1
 
     echo "##vso[task.setvariable variable=RESOURCE_GROUP_NAME]$RESOURCE_GROUP_NAME"

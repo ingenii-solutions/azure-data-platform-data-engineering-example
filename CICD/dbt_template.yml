@@ -13,6 +13,10 @@ steps:
   displayName: 'Log in with managed identity'
 
 - script: |
+    # Get and check the subscription ID
+    SUBSCRIPTION_ID=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name subscription-id-${{ parameters.environment }} --query 'value' -o tsv)
+    test "$SUBSCRIPTION_ID" || exit 1
+
     # Get and check the data lake name
     DATA_LAKE_NAME=$(az keyvault secret show --vault-name $(CONFIGURATION_REGISTRY_NAME) --name data-lake-name-${{ parameters.environment }} --query 'value' -o tsv)
     test "$DATA_LAKE_NAME" || exit 1
@@ -22,7 +26,7 @@ steps:
     DATA_LAKE_KEY=$(az storage account keys list --account-name $DATA_LAKE_NAME --query '[0].value' -o tsv)
     test "$DATA_LAKE_KEY" || exit 1
 
-    az storage blob sync --account-name $DATA_LAKE_NAME --account-key $DATA_LAKE_KEY -c dbt -s dbt --only-show-errors
+    az storage blob sync ---subscription $SUBSCRIPTION_ID -account-name $DATA_LAKE_NAME --account-key $DATA_LAKE_KEY -c dbt -s dbt --only-show-errors
   displayName: 'Sync the repository files to the data lake'
 
 - script: |
