@@ -116,9 +116,9 @@ models:
 
 ### retry_all flag
 
-When running `dbt` tests, if there are a lot of tests associated with a table we've found that a few will fail randomly due to intermittent connection issues. At time of writing `dbt-spark` will only retry a request if it deems the error it receives 'retryable' - usually when the message refers to the cluster starting up.
+When running `dbt` tests, if there are a lot of tests associated with a table we've found that a few will fail randomly due to intermittent connection issues. By default `dbt-spark` will only retry a request if it deems the error it receives 'retryable' - usually when the message refers to the cluster starting up - so we have implemented this `retry_all` flag, which will always retry the test failures. We recommend that this is set to `true`.
 
-We have created a fix to allow users to retry all errors when testing, which this flag sets. At time of writing [our PR to update dbt-spark is open](https://github.com/dbt-labs/dbt-spark/pull/194).
+For posterity, [our pull request to update dbt-spark is here](https://github.com/dbt-labs/dbt-spark/pull/194).
 
 ## Data Integration
 
