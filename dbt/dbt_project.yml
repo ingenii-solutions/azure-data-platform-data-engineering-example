@@ -29,14 +29,19 @@ clean-targets:         # directories to be removed by `dbt clean`
 # # Configuring models
 # # Full documentation: https://docs.getdbt.com/docs/configuring-models
 
-models:
-    example_dbt_project:
-        +materialized: view
-
 # Project Level Configs
 models:
-    +file_format: delta
+  example_dbt_project:
+    file_format: delta
+    materialized: table
+
+    random_data:
+      schema: random_data
+      location_root: /mnt/models/random_data
+
 # seeds:
 #     +file_format: delta
-# snapshots:
-#     +file_format: delta
+snapshots:
+  example_dbt_project:
+    file_format: delta
+    materialized: table

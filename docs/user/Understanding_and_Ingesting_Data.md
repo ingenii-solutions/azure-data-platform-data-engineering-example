@@ -8,17 +8,111 @@ After making the file available in the data lake ([Pipeline Generation](./Pipeli
 
 ## General configuration
 
-Separate to the individual table definitions described below, there is general configuration that applies to the whole platform. Below, we detail what must be set in the `profiles.yml` and `dbt_project.yml` files; you shouldn't need to update these as this is how they're set in the example files of this repository.
+Separate to the individual table definitions described below, there is general configuration that applies to the whole platform. Below we detail what we've changed from the `dbt` default.
 
-`profiles.yml`:
+### `profiles.yml`
+
+You shouldn't need to update this file, as the below is how it is set in the example files of this repository.
+
  - This file stays in the root of the project, rather than in a `/home/<username>/.dbt` folder. This is for simplification.
  - `host`, `token`, and `cluster` are drawn from environment variables that are set by our infrastructure deployment.
  - `threads` is set to 2, while the default is 5. We've found that when performing a lot of `dbt` tests the cluster seems to get overloaded and tests will randomly fail. You're free to increase this number, but be warned.
  - One configuration entry is the `retry_all` flag, which at time of writing is specific to Ingenii's extended version of dbt-spark==0.19.1. More details are given below.
 
-`dbt_project.yml`:
+### `dbt_project.yml`
+
+There are two settings that need to remain fixed:
+
  - `profile`: This must be set to `databricks` to match the entry in profiles.yml.
  - `log-path`: This must be set to `/tmp/dbt-logs`. Part of the file ingestion pipeline will move these logs to a mounted container, and expects the logs to be in this file.
+
+There are other settings that you will add as you implement your data model. To integrate well and make the data available in the whole platform, there are some requirements to follow:
+
+- `models` and `snapshots` must be tables, and not views. This will mean that the data is written to files, which can then be made available to both the Engineering and Analysis Databricks workspaces.
+- `models` and `snapshots` must be written to a specified location, so that the data is stored on the Data Lake. To aid this, there are two folders made available in Databricks: `/mnt/models` and `/mnt/snapshots`. Our recommended approach is to specify a folder per schema, and so set the `location_root` setting as `/mnt/models/<schema name>`. Data will then be stored at the path `/mnt/models/<schema name>/<table name>`. If a model or snapshot has no schema, it should be written to `/mnt/models/default` to keep the folder structure.
+
+In the example folder structure below, we create a subfolder per schema to help `dbt` to know which schema each table belongs to.
+```
+dbt
+|
+└─ models
+| |  
+| └─ schemaA
+| |    table1.sql
+| |    table2.sql
+| |  
+| └─ schemaB
+| |    table3.sql
+| |    table4.sql
+|
+└─ snapshots
+| |  
+| └─ schemaC
+| |    snapshot1.sql
+|
+| dbt_project.yml
+| profiles.yml
+```
+
+To match this, in the `dbt_projects.yml` file we set the following configuration:
+
+```yml
+name: 'example_dbt_project'
+
+. . . 
+
+# Project Level Configs
+models:
+  example_dbt_project:
+    file_format: delta # To use Databricks' Delta Lake
+    materialized: table # All models written to the Data Lake
+    schemaA: # Folder name
+      schema: schemaa # Specify the schema name, always lower case
+      location_root: /mnt/models/schemaa # Location on the mounted Data Lake container
+      # Tables will be stored at /mnt/models/schemaa/table1 and /mnt/models/schemaa/table2 in the Databricks file system
+      # These correspond to /schemaa/table1 and /schemaa/table2 of the 'models' container in the Data Lake
+    schemaB: # Folder name
+      schema: schemab # Specify the schema name, always lower case
+      location_root: /mnt/models/schemab # Location on the mounted Data Lake container
+      # Tables will be stored at /mnt/models/schemab/table3 and /mnt/models/schemab/table4 in the Databricks file system
+      # These correspond to /schemab/table3 and /schemab/table4 of the 'models' container in the Data Lake
+  
+snapshots:
+  example_dbt_project:
+    file_format: delta # To use Databricks' Delta Lake
+    schemaC: # Folder name
+      location_root: /mnt/snapshots/schemac  # Location on the mounted Data Lake container
+      # Snapshot will be stored at /mnt/snapshots/schemac/snapshot1 in the Databricks file system
+      # This corresponds to /schemac/snapshot1 of the 'snapshots' container in the Data Lake
+```
+
+We can apply this to `dbt`'s [jaffle_shop example](https://github.com/dbt-labs/jaffle_shop). The relevant parts of the original `dbt_project.yml` is :
+```yml
+name: 'jaffle_shop'
+
+. . . 
+
+models:
+  jaffle_shop:
+      materialized: table
+      staging:
+        materialized: view
+```
+
+None of the tables have a schema assosicated to them, so our updated  `dbt_project.yml` is:
+```yml
+name: 'jaffle_shop'
+
+. . . 
+
+models:
+  jaffle_shop:
+      file_format: delta # To use Databricks' Delta Lake
+      materialized: table
+      location_root: /mnt/models/default # With no specific schema, the tables are written to the 'default' folder
+      staging:
+        materialized: table # Changed from 'view'. This and the line above could be removed to inherit from the lines above 
+```
 
 ### retry_all flag
 
@@ -32,7 +126,7 @@ We have an example schema.yml in `models/random_data/` to showcase what we need 
 
 For the general schema, please see the [dbt documentation for sources](https://docs.getdbt.com/reference/source-properties). In order to integrate with our data platform, there are certain settings that are required, and some additions made to the `dbt` schema to better understand the files we are ingesting.
 
-```
+```yml
 version: 2
 
 sources:
