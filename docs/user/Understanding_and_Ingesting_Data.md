@@ -94,9 +94,9 @@ name: 'jaffle_shop'
 
 models:
   jaffle_shop:
-      materialized: table
-      staging:
-        materialized: view
+    materialized: table
+    staging:
+      materialized: view
 ```
 
 None of the tables have a schema assosicated to them, so our updated  `dbt_project.yml` is:
@@ -107,11 +107,11 @@ name: 'jaffle_shop'
 
 models:
   jaffle_shop:
-      file_format: delta # To use Databricks' Delta Lake
-      materialized: table
-      location_root: /mnt/models/default # With no specific schema, the tables are written to the 'default' folder
-      staging:
-        materialized: table # Changed from 'view'. This and the line above could be removed to inherit from the lines above 
+    file_format: delta # To use Databricks' Delta Lake
+    materialized: table
+    location_root: /mnt/models/default # With no specific schema, the tables are written to the 'default' folder
+    staging:
+      materialized: table # Changed from 'view'. This and the line above could be removed to inherit from the lines above 
 ```
 
 ### retry_all flag
