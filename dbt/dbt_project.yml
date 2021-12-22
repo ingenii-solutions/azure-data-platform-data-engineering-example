@@ -22,21 +22,26 @@ snapshot-paths: ["snapshots"]
 
 target-path: "target"  # directory which will store compiled SQL files
 clean-targets:         # directories to be removed by `dbt clean`
-    - "target"
-    - "dbt_modules"
+  - "target"
+  - "dbt_modules"
 
 
 # # Configuring models
 # # Full documentation: https://docs.getdbt.com/docs/configuring-models
 
-models:
-    example_dbt_project:
-        +materialized: view
-
 # Project Level Configs
 models:
-    +file_format: delta
+  example_dbt_project:
+    file_format: delta
+    materialized: table
+
+    random_data:
+      schema: random_data
+      location_root: /mnt/models/random_data
+
 # seeds:
 #     +file_format: delta
-# snapshots:
-#     +file_format: delta
+snapshots:
+  example_dbt_project:
+    file_format: delta
+    materialized: table
