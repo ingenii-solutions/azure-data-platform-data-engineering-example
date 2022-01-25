@@ -1,9 +1,8 @@
 # Introduction
 
-This repository holds all of the configuration for how to ingest your data into your Ingenii Azure Data Platform. In this document, and others that this links to, we provide a guide to working with the repository, and how to get a new data source into the platform so you can work with the data in Databricks.
+This repository holds all of the configuration for how to ingest raw data into your Ingenii Azure Data Platform. In this document, and others that this links to, we provide a guide to working with the repository and how to get a new data source into the platform so you can work with the data in Databricks.
 
 The full data pipeline covers:
-1. Pulling raw data into the Data Lake, with Data Factory or similar: [Creating a new pipeline to get data](#creating-a-new-pipeline-to-get-data)
 1. Pre-processing the data so that it can be ingested into the platform: [Pre-processing the raw data](#pre-processing-the-raw-data)
 1. Reading the metadata so the platform understands how to ingest and test the data: [Understanding and ingesting into the platform](#understanding-and-ingesting-into-the-platform)
 1. After this, the ingestion of the individual files is handled by the [Ingenii Azure Data Platform Databricks Runtime](https://github.com/ingenii-solutions/azure-data-platform-databricks-runtime), as these steps all happen on the Databricks platform. These final steps are:
@@ -37,12 +36,6 @@ The overall steps are:
 1. The CI/CD pipeline will deploy your resources into your Production environment.
 
 More details about the CI/CD pipelines can be found in the [CI/CD documentation](./CICD.md).
-
-## Creating a new pipeline to get data
-
-The first step of the pipeline is to get files (.csv, .json) uploaded into the `raw` container of your data lake. The files need to be added to the folder path `<data provider name>/<table name>`, where each file has a unique name within this folder. More details about why this is crucial is covered in the `Understanding and ingesting into the platform` section.
-
-If you already have a system for getting the files into the right place, then you can move to the next section. However, if you need a pipeline to obtain the data then you may be able to use the [Azure Data Factory Generator](https://github.com/ingenii-solutions/azure-data-factory-generator), which can create a pipeline and all the required objects from a small configuration file for you. The details to use this are in the [Pipeline Generation](./Pipeline_Generation.md) documentation.
 
 ## Pre-processing the raw data
 

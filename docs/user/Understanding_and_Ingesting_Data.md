@@ -1,6 +1,6 @@
 # Understanding and Ingesting Data
 
-After making the file available in the data lake ([Pipeline Generation](./Pipeline_Generation.md)) and pre-processing it into a form the platform can understand, if required, ([Pre-Processing](./Pre-Processing.md)), the final step covered here is to give the platform the metadata to understand how to read the file and create the corresponding tables in the platform itself. The dbt project in the `dbt` folder is where we set this metadata, giving information about the raw files and the data quality tests to apply. 
+After uploading the raw data file into the data lake and, if required, pre-processing it into a form the platform can understand ([Pre-Processing](./Pre-Processing.md)), the final step covered here is to give the platform the metadata to understand how to read the file and create the corresponding tables in the platform itself. The dbt project in the `dbt` folder is where we set this metadata, giving information about the raw files and the data quality tests to apply. 
 
 - [General configuration](#general-configuration) - Configuration relevant to all data
 - [Data Integration](#data-integration) - What you need to integrate a new set of data files
