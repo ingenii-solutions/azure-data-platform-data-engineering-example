@@ -1,6 +1,6 @@
 # CI/CD Pipelines
 
-Here we detail the CI/CD pipelines that come with this starting repository. The different sections are:
+Here we detail the CI/CD pipelines that come with this repository. The different sections are:
 
 - [.yaml Files](#yaml-files) - The files themselves
 - [Pipelines](#pipelines) -  The pipelines and their behaviours
