@@ -3,7 +3,7 @@
 This repository holds all of the configuration for how to ingest raw data into your Ingenii Azure Data Platform. In this document, and others that this links to, we provide a guide to working with the repository and how to get a new data source into the platform so you can work with the data in Databricks.
 
 The full data pipeline covers:
-1. Pre-processing the data so that it can be ingested into the platform: [Pre-processing the raw data](#pre-processing-the-raw-data)
+1. Pre-processing the raw data so that it can be ingested into the platform: [Pre-processing the raw data](#pre-processing-the-raw-data)
 1. Reading the metadata so the platform understands how to ingest and test the data: [Understanding and ingesting into the platform](#understanding-and-ingesting-into-the-platform)
 1. After this, the ingestion of the individual files is handled by the [Ingenii Azure Data Platform Databricks Runtime](https://github.com/ingenii-solutions/azure-data-platform-databricks-runtime), as these steps all happen on the Databricks platform. These final steps are:
    1. Ingesting the file's data into an individual table
