@@ -5,6 +5,14 @@ parameters:
   type: string
 
 steps:
+# https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt#option-1-install-with-one-command
+- script: curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+  displayName: Install az cli
+- task: DownloadPipelineArtifact@2
+  inputs:
+    artifact: package
+    path: dist
+
 - bash: echo 'Deploying to the ${{ parameters.environment }} environment'
 - script: |
     az login --identity --username ${{ parameters.user_assigned_managed_identity_id }}

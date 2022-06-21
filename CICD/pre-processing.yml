@@ -9,22 +9,28 @@ variables:
 - template: variables.yml
 
 jobs:
-- job: build
+- job: Build
+  # If Dev or Test environment is deployed
+  condition: or(ne(variables['USER_ASSIGNED_MANAGED_IDENTITY_DEV'], ''), ne(variables['USER_ASSIGNED_MANAGED_IDENTITY_TEST'], ''))
   steps:
   - template: pre-processing_template_build.yml
 
-- job: upload
-  dependsOn: build
+- job: Dev
+  dependsOn: Build
+  # Only deploy if environment exists, equal to if USER_ASSIGNED_MANAGED_IDENTITY_DEV exists
+  condition: and(ne(variables['build.sourceBranch'], 'refs/heads/main'), ne(variables['USER_ASSIGNED_MANAGED_IDENTITY_DEV'], ''))
   steps:
-  - template: pre-processing_template_prepare.yml
+  - template: pre-processing_template_upload.yml
+    parameters:
+      environment: 'dev'
+      user_assigned_managed_identity_id: $(USER_ASSIGNED_MANAGED_IDENTITY_DEV)
 
-  - ${{ if ne(variables['build.sourceBranch'], 'refs/heads/main') }}:
-    - template: pre-processing_template_upload.yml
-      parameters:
-        environment: 'dev'
-        user_assigned_managed_identity_id: $(USER_ASSIGNED_MANAGED_IDENTITY_DEV)
-  - ${{ if eq(variables['build.sourceBranch'], 'refs/heads/main') }}:
-    - template: pre-processing_template_upload.yml
-      parameters:
-        environment: 'test'
-        user_assigned_managed_identity_id: $(USER_ASSIGNED_MANAGED_IDENTITY_TEST)
+- job: Test
+  dependsOn: Build
+  # Only deploy if environment exists, equal to if USER_ASSIGNED_MANAGED_IDENTITY_TEST exists
+  condition: and(eq(variables['build.sourceBranch'], 'refs/heads/main'), ne(variables['USER_ASSIGNED_MANAGED_IDENTITY_TEST'], ''))
+  steps:
+  - template: pre-processing_template_upload.yml
+    parameters:
+      environment: 'test'
+      user_assigned_managed_identity_id: $(USER_ASSIGNED_MANAGED_IDENTITY_TEST)
