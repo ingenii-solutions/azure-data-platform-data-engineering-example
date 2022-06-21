@@ -87,7 +87,7 @@ my_function(pre_process_obj) # Did it do what I expected?
 
 ## Deployment
 
-This code is deployed to the Data Platform by creating a Python pacakge and uploading this to the data lake `utilities` container; this makes it is available to the Data Platform Databricks engineering cluster to install. The cluster expects a package to be present, and so must be uploaded to the container regardless of whether there are any pre-processing functions or not.
+This code is deployed to the Data Platform by creating a Python pacakge and uploading this to the data lake `preprocess` container; this makes it is available to the Data Platform Databricks engineering cluster to install. The cluster expects a package to be present, and so must be uploaded to the container regardless of whether there are any pre-processing functions or not.
 
 The creation and uploading of the package will be handled by the CI/CD pipelines in the `CICD` folder - the files starting with `pre-processing` - but in case you need to do this manually the steps are as follows:
 
@@ -99,6 +99,6 @@ python -m ingenii_data_engineering pre_processing_package pre_process
 
 3. Upload the generated `.whl` file using the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/storage/blob?view=azure-cli-latest#az_storage_blob_upload) command 
 ```bash
-az storage blob upload --account-name <data lake name> --account-key <data lake account key> -f dist/pre_process-1.0.0-py3-none-any.whl -c utilities -n pre_process/pre_process-1.0.0-py3-none-any.whl
+az storage blob upload --account-name <data lake name> --account-key <data lake account key> -f dist/pre_process-1.0.0-py3-none-any.whl -c preprocess -n pre_process-1.0.0-py3-none-any.whl --overwrite
 ```
 4. In the above example we use the account key, but any authentication that the [Azure CLI command supports](https://docs.microsoft.com/en-us/cli/azure/storage/blob?view=azure-cli-latest#az_storage_blob_upload) can be used with an adjusted command.

@@ -13,8 +13,6 @@ jobs:
 - job: upload
   dependsOn: build
   steps:
-  - template: pre-processing_template_prepare.yml
-
   - template: pre-processing_template_upload.yml
     parameters:
       environment: 'prod'
